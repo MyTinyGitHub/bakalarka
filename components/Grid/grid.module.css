@@ -1,0 +1,13 @@
+.grid {
+  display: grid;
+  grid-gap: 0;
+
+  grid-template-columns: repeat(var(--grid-size), minmax(32px, 1fr));
+  grid-template-rows: auto;
+  grid-auto-flow: row;
+
+  position: absolute;
+  left: 50%;
+  top: 53%;
+  transform: translate(-50%, -50%);
+}
