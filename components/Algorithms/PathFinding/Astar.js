@@ -1,7 +1,6 @@
 import { getNeigbours, buildResult } from "../HelperFunctions";
-import { walls, number_of_cols, number_of_rows } from "../../Grid/grid";
-import { start_col, start_row, finish_col, finish_row } from "../../Grid/grid";
 import { PathFindingAlgorithm } from "./PathFindingAlgorithm";
+import Instances from "../../Instances/Instances";
 
 export class Astar extends PathFindingAlgorithm {
   constructor() {
@@ -22,19 +21,19 @@ export class Astar extends PathFindingAlgorithm {
   }
 
   initialize() {
-    this.gScore = new Array(number_of_cols * number_of_rows);
-    this.hScore = new Array(number_of_cols * number_of_rows);
+    this.gScore = new Array(Instances.getGrid().size());
+    this.hScore = new Array(Instances.getGrid().size());
 
-    this.prev = new Array(number_of_cols * number_of_rows);
+    this.prev = new Array(Instances.getGrid().size());
     this.aVisited = new Set();
 
     this.toVisit = [];
     this.found = false;
 
-    this.start = start_row * number_of_cols + start_col;
-    this.finish = finish_row * number_of_cols + finish_col;
+    this.start = Instances.getStart().getIndex();
+    this.finish = Instances.getFinish().getIndex();
 
-    for (let i = 0; i < number_of_cols * number_of_rows; i++) {
+    for (let i = 0; i < Instances.getGrid().size(); i++) {
       this.gScore[i] = Infinity;
       this.hScore[i] = Infinity;
     }
@@ -103,9 +102,11 @@ export class Astar extends PathFindingAlgorithm {
   }
 
   calculateHScore(node, finish) {
-    let xValue = Math.abs((node % number_of_cols) - (finish % number_of_cols));
+    const columns = Instances.getGrid().getColumns();
+
+    let xValue = Math.abs((node % columns) - (finish % columns));
     let yValue = Math.abs(
-      Math.floor(node / number_of_cols) - Math.floor(finish / number_of_cols)
+      Math.floor(node / columns) - Math.floor(finish / columns)
     );
 
     return xValue + yValue;

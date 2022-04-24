@@ -1,126 +1,133 @@
 import React, { useState, useMemo } from "react";
 import { DropDownList } from "@progress/kendo-react-dropdowns";
 import classes from "./drop-down-menu.module.css";
-import "@progress/kendo-theme-default/dist/all.css";
-import TextField from "@mui/material/TextField";
 import { start_col, start_row, finish_col, finish_row } from "../Grid/grid";
-
-// export let step_position = 0;
+import "@progress/kendo-theme-default/dist/all.css";
+import { DisplayHandler } from "../Helpers/display-handler";
+import { AlgorithmHandler } from "../Helpers/algorithm-handler";
+import ControlState from "../Controller/ControlState";
+import Instances from "../Instances/Instances";
 
 const algorithms_display_names = [
-  "Dijkstra",
-  "Astar",
-  "Breadth First Search",
-  "Depth First Search",
+  Instances.getLanguageText().getText("dijkstra"),
+  Instances.getLanguageText().getText("astar"),
+  Instances.getLanguageText().getText("bfs"),
+  Instances.getLanguageText().getText("dfs"),
 ];
 
-const algorithm_todo = {
-  Dijkstra: "dijkstra",
-  Astar: "astar",
-  "Breadth First Search": "bfs",
-  "Depth First Search": "dfs",
-};
-
-const maze_builds = ["Tree Maze", "Side Winder"];
+const maze_builds = [
+  Instances.getLanguageText().getText("tree-maze"),
+  Instances.getLanguageText().getText("side-winder-maze"),
+];
 
 export const UINavbar = (props) => {
   const [category, setCategory] = useState("");
   const [mazeBuild, setMazeBuild] = useState("");
-  const [values, setValues] = useState(0);
+  const [values, setValues] = useState(1);
   const [step_position, setStepPosition] = useState("");
-  const [startRow, setStartRow] = useState(start_row);
-  const [startCol, setStartCol] = useState(start_col);
-  const [endRow, setEndRow] = useState(finish_row);
-  const [endCol, setEndCol] = useState(finish_col);
 
-  const verifyChange = () => {
-    if (start_col !== startCol || start_row !== startRow) {
-      setStartCol(start_col);
-      setStartRow(start_row);
-      step_position = 0;
-    }
+  const step = (stepType) => {
+    if (ControlState.getInstance().isOperational()) return;
 
-    if (endCol !== finish_col || endRow !== finish_row) {
-      setEndCol(finish_col);
-      setEndRow(finish_row);
-      step_position = 0;
+    if (ControlState.getInstance().isPositionChanged()) {
+      ControlState.getInstance().resetPositionTracking();
+      setStepPosition(0);
     }
 
     if (step_position == 0) {
-      props.clearAlgorithm();
+      DisplayHandler.clearAlgorithm();
     }
-  };
-
-  let nextStep = () => {
-    verifyChange();
 
     const val = parseInt(values);
-    if (val % 1 === 0) {
-      setStepPosition(props.displayStepByStep("next", step_position, val));
+    if (parseInt(values) % 1 === 0) {
+      setStepPosition(
+        DisplayHandler.displayAlgorithmStepByStep(stepType, step_position, val)
+      );
     }
-  };
-
-  const prevStep = () => {
-    verifyChange();
-
-    const val = parseInt(values);
-    if (val % 1 === 0) {
-      setStepPosition(props.displayStepByStep("back", step_position, val));
-    }
-  };
-
-  const disp = () => {
-    props.calculate(algorithm_todo[category]);
-    props.display(algorithm_todo[category]);
   };
 
   const changeCategory = useMemo(() => {
-    if (category === "Select Algorithm...") props.clearAlgorithm();
-    setStepPosition(0);
-    disp();
+    if (category === Instances.getLanguageText().getText("select-algo"))
+      DisplayHandler.clearAlgorithm();
   }, [category]);
 
   const changeMazeBuild = useMemo(() => {
-    if (mazeBuild === "Select Maze...") props.clearMaze();
-    props.calculate_maze(mazeBuild);
-    props.display_maze();
+    if (mazeBuild === Instances.getLanguageText().getText("select-algo"))
+      DisplayHandler.reset();
   }, [mazeBuild]);
 
   const updateInputValue = (evt) => {
     const val = evt.target.value;
     setValues(val);
   };
+
+  const runAlgorithm = () => {
+    if (ControlState.getInstance().isOperational()) return;
+
+    AlgorithmHandler.calculateAlgorithm(category);
+    DisplayHandler.displayAlgorithm();
+    setStepPosition(0);
+  };
+
+  const createMaze = () => {
+    if (ControlState.getInstance().isOperational()) return;
+
+    AlgorithmHandler.determine_maze(mazeBuild);
+    DisplayHandler.create_maze();
+  };
+
   return (
     <section className={classes.navbar}>
       <ul className={classes.navList}>
-        <li className={classes.listItem}>
-          <DropDownList
-            style={{
-              width: "200px",
-            }}
-            className={classes.dropDown}
-            size={"medium"}
-            fillMode={"solid"}
-            data={algorithms_display_names}
-            onChange={(e) => setCategory(e.value)}
-            defaultItem="Select Algorithm..."
+        <div className={classes.block}>
+          <li className={classes.listItem}>
+            <DropDownList
+              style={{
+                width: "200px",
+              }}
+              className={classes.dropDown}
+              size={"medium"}
+              fillMode={"solid"}
+              data={algorithms_display_names}
+              onChange={(e) => setCategory(e.value)}
+              defaultItem={Instances.getLanguageText().getText("select-algo")}
+            />
+          </li>
+          <button onClick={runAlgorithm} className={classes.navButton}>
+            Run Algorithm
+          </button>
+        </div>
+
+        <div className={classes.block}>
+          <li className={classes.listItem}>
+            <DropDownList
+              style={{
+                width: "150px",
+              }}
+              data={maze_builds}
+              onChange={(e) => setMazeBuild(e.value)}
+              defaultItem={Instances.getLanguageText().getText("select-maze")}
+            />
+          </li>
+          <button onClick={createMaze} className={classes.navButton}>
+            Create Maze
+          </button>
+        </div>
+
+        <li>
+          <button onClick={() => step("back")} className={classes.navButton}>
+            Do Prev-Step
+          </button>
+          <input
+            value={values}
+            onChange={(evt) => updateInputValue(evt)}
+            className={classes.navInput}
           />
-        </li>
-        <li className={classes.listItem}>
-          <DropDownList
-            style={{
-              width: "150px",
-            }}
-            data={maze_builds}
-            onChange={(e) => setMazeBuild(e.value)}
-            defaultItem="Select Maze..."
-          />
+          <button onClick={() => step("next")} className={classes.navButton}>
+            Do Next-Step
+          </button>
         </li>
       </ul>
-
-      <button onClick={nextStep}>Do Next-Step</button>
-      <input value={values} onChange={(evt) => updateInputValue(evt)} />
-      <button onClick={prevStep}>Do Prev-Step</button>
     </section>
   );
 };

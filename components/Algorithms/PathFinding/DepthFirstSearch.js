@@ -1,7 +1,6 @@
 import { getNeigbours, buildResult } from "../HelperFunctions";
-import { walls, number_of_cols, number_of_rows } from "../../Grid/grid";
-import { start_col, start_row, finish_col, finish_row } from "../../Grid/grid";
 import { PathFindingAlgorithm } from "./PathFindingAlgorithm";
+import Instances from "../../Instances/Instances";
 
 export class DepthFirstSearch extends PathFindingAlgorithm {
   constructor() {
@@ -24,17 +23,16 @@ export class DepthFirstSearch extends PathFindingAlgorithm {
     this.visited = [];
     this.toVisit = [];
 
-    this.prev = new Array(number_of_cols * number_of_rows);
     this.found = false;
+    this.prev = new Array(Instances.getGrid().size());
 
-    this.start = start_row * number_of_cols + start_col;
-    this.finish = finish_row * number_of_cols + finish_col;
+    this.start = Instances.getStart().getIndex();
+    this.finish = Instances.getFinish().getIndex();
   }
 
   execute() {
     this.initialize();
     let node = this.start;
-    let next_node = null;
 
     this.toVisit.push(node);
     this.visited.push(node);

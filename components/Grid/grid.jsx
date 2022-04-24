@@ -1,20 +1,18 @@
 import React, { Component } from "react";
 import Node from "./node";
-import Navbar from "../UI/navbar";
+import { UINavbar } from "../UI/drop-down-menu";
 import classes from "./Grid.module.css";
 
 import { DisplayHandler } from "../Helpers/display-handler";
-import { AlgorithmHandler } from "../Helpers/algorithm-handler";
+
+import MouseMode from "../Controller/MouseMode";
+import Instances from "../Instances/Instances";
+import CurrentOperation from "../UI/current-operation";
 
 export let number_of_rows = 16;
 export let number_of_cols = 16;
+
 export const walls = new Set();
-
-export let start_row = 1;
-export let start_col = 1;
-
-export let finish_row = 2;
-export let finish_col = 1;
 
 const setWallBool = (Grid, r, c, value) =>
   Grid.map((row, rowIdx) =>
@@ -78,20 +76,14 @@ export default class GridClass extends Component {
 
     this.state = {
       grid: [],
-      mouseMode: "",
-      seconds: 0,
     };
 
-    this.set_mouse_state = this.set_mouse_state.bind(this);
+    Instances.getGrid().setGrid(this);
+
     this.mouse_down = this.mouse_down.bind(this);
     this.mouseUp = this.mouse_up.bind(this);
-
-    this.result = [];
-    this.array = [];
-    this.path = [];
-
-    this.algorithm = null;
-    this.maze = null;
+    this.changeStartAndFinishPosition =
+      this.changeStartAndFinishPosition.bind(this);
 
     this.setWall = function setWall(row, col) {
       walls.add(row * number_of_cols + col);
@@ -124,39 +116,45 @@ export default class GridClass extends Component {
       return walls.has(row * number_of_cols + col);
     };
 
-    this.toggleFinish = function toggleFinish(row, col, value) {
-      if (value === true) {
-        finish_col = col;
-        finish_row = row;
-
-        DisplayHandler.clearAlgorithm();
-        DisplayHandler.instant(this.algorithm);
-      }
+    this.setFinish = function toggleFinish(row, col, value) {
+      if (value === true) this.changeStartAndFinishPosition("finish", row, col);
 
       this.setState((state) => ({
         grid: setFinish(state.grid, row, col, value),
       }));
+
+      DisplayHandler.instant();
     }.bind(this);
 
-    this.toggleStart = function toggleStart(row, col, value) {
-      if (value == true) {
-        start_col = col;
-        start_row = row;
-
-        DisplayHandler.clearAlgorithm();
-        DisplayHandler.instant(this.algorithm);
-      }
+    this.setStart = function toggleStart(row, col, value) {
+      if (value == true) this.changeStartAndFinishPosition("start", row, col);
 
       this.setState((state) => ({
         grid: setStart(state.grid, row, col, value),
       }));
+
+      DisplayHandler.instant();
     }.bind(this);
+  }
+
+  changeStartAndFinishPosition(type, row, col) {
+    switch (type) {
+      case "start":
+        Instances.getStart().setPositions(row, col);
+        break;
+      case "finish":
+        Instances.getFinish().setPositions(row, col);
+        break;
+    }
   }
 
   componentDidMount() {
     number_of_rows = Math.floor((window.innerHeight - 200) / 32);
     number_of_cols = Math.floor(window.innerWidth / 32);
     document.documentElement.style.setProperty("--grid-size", number_of_cols);
+
+    Instances.getGrid().setRows(number_of_rows);
+    Instances.getGrid().setColumns(number_of_cols);
 
     this.setState({
       grid: this.create_grid(),
@@ -168,21 +166,13 @@ export default class GridClass extends Component {
   }
 
   mouse_up(e) {
-    this.setState({
-      mouseMode: "",
-    });
+    MouseMode.getInstance().setMode("");
   }
 
   mouse_leave(e) {
-    if (this.state.mouseMode == "wall") {
-      this.mouse_up("false");
+    if (MouseMode.getInstance().isEqual("wall")) {
+      MouseMode.getInstance().setMode("");
     }
-  }
-
-  set_mouse_state(state) {
-    this.setState({
-      mouseMode: state,
-    });
   }
 
   create_grid() {
@@ -193,43 +183,24 @@ export default class GridClass extends Component {
       for (let column = 0; column < number_of_cols; column++) {
         current_row.push({
           isWall: false,
-          isFinish: finish_row === row && finish_col === column,
-          isStart: start_row === row && start_col === column,
+          isFinish: Instances.getFinish().isEqual(row, column),
+          isStart: Instances.getStart().isEqual(row, column),
         });
       }
       grid.push(current_row);
     }
+
     return grid;
   }
 
   render() {
     return (
       <>
-        <Navbar
-          reset={() => DisplayHandler.reset(this)}
-          display={() => DisplayHandler.displayAlgorithm(this.algorithm)}
-          calculate={(e) => {
-            this.algorithm = AlgorithmHandler.calculateAlgorithm(e);
-          }}
-          calculate_maze={(e) => {
-            this.maze = AlgorithmHandler.determine_maze(e);
-          }}
-          display_maze={() => DisplayHandler.create_maze(this, this.maze)}
-          clearAlgorithm={() => {
-            DisplayHandler.clearAlgorithm();
-          }}
-          displayStepByStep={(direction, position, step) =>
-            DisplayHandler.displayAlgorithmStepByStep(
-              direction,
-              this.algorithm,
-              position,
-              step
-            )
-          }
-        ></Navbar>
+        <UINavbar></UINavbar>
+        <CurrentOperation></CurrentOperation>
 
         <div onMouseDown={(e) => this.mouse_down(e)}>
-          <div onMouseUp={(e) => this.mouse_up(e)} className={classes.griddiv}>
+          <div onMouseUp={(e) => this.mouse_up(e)}>
             <div
               onMouseLeave={(e) => this.mouse_leave(e)}
               className={classes.grid}
@@ -247,12 +218,6 @@ export default class GridClass extends Component {
                       isWall={isWall}
                       isFinish={isFinish}
                       isStart={isStart}
-                      mouseMode={this.state.mouseMode}
-                      setMouseState={this.set_mouse_state}
-                      setWall={this.toggleWall}
-                      setFinish={this.toggleFinish}
-                      setStart={this.toggleStart}
-                      wallSet={walls}
                     ></Node>
                   );
                 });

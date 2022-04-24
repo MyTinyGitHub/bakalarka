@@ -8,7 +8,7 @@ export class TreeMaze extends MazeBuilder {
     this.grid = [];
   }
 
-  create_maze() {
+  create() {
     for (let row = 0; row < number_of_rows; row++) {
       const current_row = [];
       for (let col = 0; col < number_of_cols; col++) {

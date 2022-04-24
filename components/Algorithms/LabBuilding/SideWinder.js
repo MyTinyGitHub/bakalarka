@@ -6,7 +6,7 @@ export class SideWinder extends MazeBuilder {
     super();
   }
 
-  create_maze() {
+  create() {
     const grid = [];
     for (let row = 0; row < number_of_rows; row++) {
       const current_row = [];

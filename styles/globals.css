@@ -19,6 +19,10 @@ a {
   box-sizing: border-box;
 }
 
+body {
+  background-color: #d8dddd;
+}
+
 .node,
 .node-start,
 .node-finish,
@@ -31,118 +35,74 @@ a {
 
 .node {
   border-color: rgb(53, 152, 170);
-  animation-name: fillOut;
-  animation-duration: 750ms;
-  animation-fill-mode: backwards;
 }
 
 .node-wall {
-  animation-name: fillIn;
-  animation-duration: 800ms;
+  animation-name: fillInWall;
+  animation-duration: 1.75s;
   animation-fill-mode: forwards;
   animation-timing-function: ease-out;
 
   background-color: rgb(27, 63, 105);
-  border-color: rgb(27, 63, 105);
+  border-color: rgb(44, 76, 112);
 }
 
 .node-finish {
-  /* animation-name: fillInStartAndFinish;
-  animation-duration: 1000ms;
-  animation-fill-mode: forwards;
-  animation-timing-function: ease-out; */
-
   background-image: url("../public/images/end.png");
   background-size: cover;
 }
 
 .node-algo {
-  animation-name: fillIn;
-  animation-duration: 800ms;
+  animation-name: fillInAlgo;
+  animation-duration: 3s;
   animation-fill-mode: forwards;
   animation-timing-function: ease-out;
 
   background-color: rgb(8, 233, 233);
-  border-color: rgb(8, 233, 233);
+  border-color: rgb(2, 124, 124);
 }
 
 .node-result {
-  animation-name: fillIn;
-  animation-duration: 800ms;
+  animation-name: fillInResult;
+  animation-duration: 0.7s;
   animation-fill-mode: forwards;
   animation-timing-function: ease-out;
 
   background-color: rgb(229, 233, 8);
-  border-color: rgb(229, 233, 8);
+  border-color: rgb(205, 208, 8);
 }
 
 .node-start {
-  /* animation-name: fillInStartAndFinish; */
-  /* animation-duration: 1000ms; */
-  /* animation-fill-mode: forwards; */
-  /* animation-timing-function: ease-out; */
-
   background-image: url("../public/images/play-button.png");
   background-size: cover;
 }
 
-.btn {
-  text-align: center;
-  background-color: rgb(49, 49, 49);
-  padding: 0.1rem;
+@keyframes fillInWall {
+  from {
+    background-color: #d8dddd;
+  }
+
+  to {
+    background-color: rgb(27, 63, 105);
+  }
 }
 
-.btn li {
-  display: inline;
+@keyframes fillInAlgo {
+  from {
+    background-color: rgb(222, 8, 233);
+  }
+
+  to {
+    background-color: rgb(8, 233, 233);
+  }
 }
 
-.btn li a {
-  color: white;
-  padding: 0.5rem;
-  margin-left: 0.3rem;
-  margin-right: 0.3rem;
-}
+@keyframes fillInResult {
+  from {
+    background-color: rgb(106, 127, 1);
+  }
 
-.maze-buttons {
-  margin-top: 0;
-}
-
-.algo-buttons {
-  margin-bottom: 0;
-  margin-top: 0;
-}
-
-.algo-buttons ul li {
-  font-size: 1.15rem;
-}
-
-.maze-buttons ul li {
-  font-size: 0.95rem;
-}
-
-.btn ul li :hover {
-  background-color: rgba(143, 143, 143, 0.788);
-  border-radius: 10%;
-}
-
-.algo-buttons ul li :hover {
-  color: rgb(163, 212, 245);
-}
-
-.maze-buttons ul li :hover {
-  color: rgb(255, 138, 167);
-}
-
-.modal > .close {
-  cursor: pointer;
-  position: absolute;
-  display: block;
-  padding: 2px 5px;
-  line-height: 20px;
-  right: -10px;
-  top: -10px;
-  font-size: 24px;
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #cfcece;
+  to {
+    background-color: rgb(229, 233, 8);
+  }
 }

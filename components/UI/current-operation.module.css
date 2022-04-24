@@ -1,0 +1,13 @@
+.text {
+  width: 100%;
+  color: rgb(27, 63, 105);
+  display: inline-block;
+  text-align: center;
+  align-items: flex-start;
+  font-weight: bold;
+}
+
+.navbar {
+  font: 400 20px system-ui;
+  width: 100%;
+}

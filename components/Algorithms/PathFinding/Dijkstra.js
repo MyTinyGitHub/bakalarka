@@ -1,7 +1,6 @@
 import { getNeigbours, buildResult } from "../HelperFunctions";
-import { walls, number_of_cols, number_of_rows } from "../../Grid/grid";
-import { start_col, start_row, finish_col, finish_row } from "../../Grid/grid";
 import { PathFindingAlgorithm } from "./PathFindingAlgorithm";
+import Instances from "../../Instances/Instances";
 
 export class Dijkstra extends PathFindingAlgorithm {
   constructor() {
@@ -21,15 +20,15 @@ export class Dijkstra extends PathFindingAlgorithm {
   initialize() {
     this.visited = [];
 
-    this.prev = new Array(number_of_cols * number_of_rows);
-    this.dist = new Array(number_of_cols * number_of_rows);
+    this.prev = new Array(Instances.getGrid().size());
+    this.dist = new Array(Instances.getGrid().size());
 
     this.found = false;
 
-    this.start = start_row * number_of_cols + start_col;
-    this.finish = finish_row * number_of_cols + finish_col;
+    this.start = Instances.getStart().getIndex();
+    this.finish = Instances.getFinish().getIndex();
 
-    for (let i = 0; i < number_of_cols * number_of_rows; i++) {
+    for (let i = 0; i < Instances.getGrid().size(); i++) {
       this.dist[i] = Infinity;
       this.prev[i] = null;
     }

@@ -1,0 +1,27 @@
+{
+  "en-locale": {
+    "type": "enUS",
+
+    "welcome": "Welcome, first build or generate your maze, then choose your algorithm and press run",
+    "searching": "The algorithm is currently searching for the goal",
+    "building-path": "The algorithm found the goal, now it's building path back to origin",
+    "no-valid-path": "Currently there is no valid path in the maze, please rebuild your maze",
+    "finished": "Algorithm is finished",
+
+    "run-algorithm": "Run Algorithm",
+    "create-maze": "Create Maze",
+    "prev-step": "Do Prev-Step",
+    "next-step": "Do Next-Step",
+
+    "select-maze": "Select Maze...",
+    "select-algo": "Select Algorithm...",
+
+    "dijkstra": "Dijkstra",
+    "astar": "Astar",
+    "bfs": "Breadth First Search",
+    "dfs": "Depth First Search",
+
+    "tree-maze": "Tree Maze",
+    "side-winder-maze": "Side Winder"
+  }
+}

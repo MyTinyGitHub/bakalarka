@@ -1,25 +1,38 @@
 import { MazeBuilder } from "../Algorithms/LabBuilding/MazeBuilder";
 import { number_of_cols, number_of_rows } from "../Grid/grid";
-import { step_position } from "../UI/drop-down-menu";
-import { start_col, start_row, finish_col, finish_row } from "../Grid/grid";
+
+import ControlState from "../Controller/ControlState";
+import Instances from "../Instances/Instances";
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 export class DisplayHandler {
   constructor() {}
 
-  static displayAlgorithm(algorithm) {
-    if (algorithm == null) return;
+  static displayAlgorithm() {
+    if (Instances.getAlgorithm().isEmpty()) return;
+
+    DisplayHandler.clearAlgorithm();
+
+    const algorithm = Instances.getAlgorithm().getAlgorithm();
 
     const result = algorithm.execute();
     const array = result["visited"];
     const path = result["prev"];
 
     if (path.length === 0) {
+      Instances.getCurrentOperationText().setTextFromLocale("no-valid-path");
       return;
     }
 
-    DisplayHandler.clearAlgorithm();
+    ControlState.getInstance().setOperational(true);
 
     let i = 0;
     const tick = 50;
+
+    Instances.getCurrentOperationText().setText(
+      Instances.getLanguageText().getText("searching")
+    );
 
     array.forEach((node) => {
       setTimeout(() => {
@@ -31,6 +44,18 @@ export class DisplayHandler {
       setTimeout(() => {
         document.getElementById(node).classList.add("node-result");
       }, tick * ++i);
+    });
+
+    sleep(array.length * tick).then(() => {
+      Instances.getCurrentOperationText().setTextFromLocale("building-path");
+    });
+
+    sleep(array.length * tick + path.length * tick).then(() => {
+      ControlState.getInstance().setOperational(false);
+      Instances.getCurrentOperationText().setTextFromLocale("finished");
+      setTimeout(() => {
+        Instances.getCurrentOperationText().setTextFromLocale("welcome");
+      }, 8000);
     });
   }
 
@@ -48,13 +73,10 @@ export class DisplayHandler {
     return position;
   }
 
-  static displayAlgorithmStepByStep(
-    direction,
-    algorithm,
-    position,
-    number_of_steps
-  ) {
-    if (algorithm == null) return;
+  static displayAlgorithmStepByStep(direction, position, number_of_steps) {
+    if (Instances.getAlgorithm().isEmpty()) return;
+
+    const algorithm = Instances.getAlgorithm().getAlgorithm();
 
     const result = algorithm.execute();
     const array = result["visited"];
@@ -101,15 +123,18 @@ export class DisplayHandler {
     }
   }
 
-  static reset(grid) {
+  static reset() {
+    if (Instances.getGrid().isEmpty()) return;
+
     for (let index_x = 0; index_x < number_of_rows; index_x++) {
       for (let index_y = 0; index_y < number_of_cols; index_y++) {
         const result_index = index_x * number_of_cols + index_y;
 
-        if (document.getElementById(result_index).classList[1] === "node-wall")
-          document.getElementById(result_index).className = "node";
-
-        grid.clearWall(index_x, index_y);
+        if (
+          document.getElementById(result_index).classList[1] === "node-wall"
+        ) {
+          Instances.getGrid().getGrid().clearWall(index_x, index_y);
+        }
       }
     }
   }
@@ -148,9 +173,10 @@ export class DisplayHandler {
     }
   }
 
-  static instant(algorithm) {
-    if (algorithm == null) return;
-    step_position = 0;
+  static instant() {
+    if (Instances.getAlgorithm().isEmpty()) return;
+
+    const algorithm = Instances.getAlgorithm().getAlgorithm();
 
     const result = algorithm.execute();
     const array = result["visited"];
@@ -161,52 +187,45 @@ export class DisplayHandler {
     }
 
     DisplayHandler.clearAlgorithm();
-    let lstart = start_row * number_of_cols + start_col;
-    let lfinish = finish_row * number_of_cols + finish_col;
+
+    let lfinish = Instances.getFinish().getIndex();
 
     path.push(lfinish);
     array.forEach((node) => {
-      document.getElementById(node).classList.add("node-algo");
+      if (document.getElementById(node) != null)
+        document.getElementById(node).classList.add("node-algo");
     });
 
     path.forEach((node) => {
-      document.getElementById(node).classList.add("node-result");
+      if (document.getElementById(node) != null)
+        document.getElementById(node).classList.add("node-result");
     });
   }
 
-  static create_maze(grid, maze) {
-    if (maze === null) return;
+  static create_maze() {
+    if (Instances.getMaze().isEmpty()) return;
+    if (Instances.getGrid().isEmpty()) return;
+
+    if (!(Instances.getMaze().getAlgorithm() instanceof MazeBuilder)) return;
+
+    DisplayHandler.reset();
     DisplayHandler.clearAlgorithm();
 
-    if (!(maze instanceof MazeBuilder)) return;
+    let maze_grid = Instances.getMaze().getAlgorithm().create();
 
-    let maze_grid = maze.create_maze();
-
-    let start = -1;
-    let finish = -1;
-
-    for (let i = 0; i < number_of_cols * number_of_rows; i++) {
-      let node_element = document.getElementById(i).classList[i];
-
-      if (node_element === "node-start") {
-        start = i;
-      }
-
-      if (node_element === "node-finish") {
-        finish = i;
-      }
-    }
+    let start = Instances.getStart().getIndex();
+    let finish = Instances.getFinish().getIndex();
 
     maze_grid.map((row, row_idx) => {
       row.map((col, col_idx) => {
         let index = row_idx * number_of_cols + col_idx;
         if (col === 0) {
-          grid.clearWall(row_idx, col_idx);
+          Instances.getGrid().getGrid().clearWall(row_idx, col_idx);
         }
 
         if (col === 1 && index !== start && index !== finish) {
-          if (!grid.isWall(row_idx, col_idx)) {
-            grid.setWall(row_idx, col_idx);
+          if (!Instances.getGrid().getGrid().isWall(row_idx, col_idx)) {
+            Instances.getGrid().getGrid().setWall(row_idx, col_idx);
           }
         }
       });
