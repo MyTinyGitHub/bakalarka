@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import ControlState from "../Controller/ControlState";
 import MouseMode from "../Controller/MouseMode";
+import WeightController from "../Controller/WeightController";
 import { DisplayHandler } from "../Helpers/display-handler";
 import Instances from "../Instances/Instances";
+
 export default class Node extends Component {
   constructor(props) {
     super(props);
@@ -19,6 +21,10 @@ export default class Node extends Component {
       : this.props.isWall
       ? "node node-wall"
       : "node";
+  }
+
+  getWeight() {
+    return " weight" + WeightController.getInstance().getWeightOnIndex(this.id);
   }
 
   mouseLeave() {
@@ -82,7 +88,7 @@ export default class Node extends Component {
     return (
       <div
         id={this.id}
-        className={this.getClassName()}
+        className={this.getClassName() + this.getWeight()}
         onMouseDown={() => this.mouseDown()}
         onMouseEnter={() => this.mouseEnter()}
         onMouseLeave={() => this.mouseLeave()}

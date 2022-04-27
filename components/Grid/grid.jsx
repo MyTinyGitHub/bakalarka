@@ -8,6 +8,7 @@ import { DisplayHandler } from "../Helpers/display-handler";
 import MouseMode from "../Controller/MouseMode";
 import Instances from "../Instances/Instances";
 import CurrentOperation from "../UI/current-operation";
+import WeightController from "../Controller/WeightController";
 
 export let number_of_rows = 16;
 export let number_of_cols = 16;
@@ -56,6 +57,20 @@ const setFinish = (Grid, r, c, value) =>
       : row
   );
 
+const setWeight = (Grid, r, c, value) =>
+  Grid.map((row, rowIdx) =>
+    rowIdx === r
+      ? row.map((column, columnIdx) =>
+          columnIdx === c
+            ? {
+                ...column,
+                weight: value,
+              }
+            : column
+        )
+      : row
+  );
+
 const setStart = (Grid, r, c, value) =>
   Grid.map((row, rowIdx) =>
     rowIdx === r
@@ -86,11 +101,23 @@ export default class GridClass extends Component {
       this.changeStartAndFinishPosition.bind(this);
 
     this.setWall = function setWall(row, col) {
-      walls.add(row * number_of_cols + col);
-
-      this.setState((state) => ({
-        grid: setWallBool(state.grid, row, col, true),
-      }));
+      if (
+        WeightController.getInstance().getWeight() ===
+        Instances.getLanguageText().getText("select-weight")
+      ) {
+        walls.add(row * number_of_cols + col);
+        this.setState((state) => ({
+          grid: setWallBool(state.grid, row, col, true),
+        }));
+      } else {
+        WeightController.getInstance().setWeightOnIndex(
+          row * number_of_cols + col
+        );
+        this.clearWall(row, col);
+        this.setState((state) => ({
+          grid: setWeight(state.grid, row, col, false),
+        }));
+      }
     }.bind(this);
 
     this.clearWall = function clearWall(row, col) {
@@ -101,15 +128,28 @@ export default class GridClass extends Component {
     }.bind(this);
 
     this.toggleWall = function toggleWall(row, col) {
-      if (walls.has(row * number_of_cols + col)) {
-        walls.delete(row * number_of_cols + col);
-      } else {
-        walls.add(row * number_of_cols + col);
-      }
+      if (
+        WeightController.getInstance().getWeight() ===
+        Instances.getLanguageText().getText("select-weight")
+      ) {
+        if (walls.has(row * number_of_cols + col)) {
+          walls.delete(row * number_of_cols + col);
+        } else {
+          walls.add(row * number_of_cols + col);
+        }
 
-      this.setState((state) => ({
-        grid: setWall(state.grid, row, col),
-      }));
+        this.setState((state) => ({
+          grid: setWall(state.grid, row, col),
+        }));
+      } else {
+        WeightController.getInstance().setWeightOnIndex(
+          row * number_of_cols + col
+        );
+        this.clearWall(row, col);
+        this.setState((state) => ({
+          grid: setWeight(state.grid, row, col, false),
+        }));
+      }
     }.bind(this);
 
     this.isWall = function isWall(row, col) {
@@ -151,7 +191,12 @@ export default class GridClass extends Component {
   componentDidMount() {
     number_of_rows = Math.floor((window.innerHeight - 200) / 32);
     number_of_cols = Math.floor(window.innerWidth / 32);
+
     document.documentElement.style.setProperty("--grid-size", number_of_cols);
+
+    for (let i = 0; i < number_of_cols * number_of_rows; i++) {
+      WeightController.getInstance().setConcreteWeightOnIndex(i, 1);
+    }
 
     Instances.getGrid().setRows(number_of_rows);
     Instances.getGrid().setColumns(number_of_cols);
@@ -185,6 +230,7 @@ export default class GridClass extends Component {
           isWall: false,
           isFinish: Instances.getFinish().isEqual(row, column),
           isStart: Instances.getStart().isEqual(row, column),
+          weight: Infinity,
         });
       }
       grid.push(current_row);

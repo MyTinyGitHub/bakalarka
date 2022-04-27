@@ -7,6 +7,7 @@ import { DisplayHandler } from "../Helpers/display-handler";
 import { AlgorithmHandler } from "../Helpers/algorithm-handler";
 import ControlState from "../Controller/ControlState";
 import Instances from "../Instances/Instances";
+import WeightController from "../Controller/WeightController";
 
 const algorithms_display_names = [
   Instances.getLanguageText().getText("dijkstra"),
@@ -20,10 +21,17 @@ const maze_builds = [
   Instances.getLanguageText().getText("side-winder-maze"),
 ];
 
+const weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
 export const UINavbar = (props) => {
   const [category, setCategory] = useState("");
   const [mazeBuild, setMazeBuild] = useState("");
+
+  const [weight, setWeight] = useState(
+    Instances.getLanguageText().getText("select-weight")
+  );
   const [values, setValues] = useState(1);
+
   const [step_position, setStepPosition] = useState("");
 
   const step = (stepType) => {
@@ -55,6 +63,10 @@ export const UINavbar = (props) => {
     if (mazeBuild === Instances.getLanguageText().getText("select-algo"))
       DisplayHandler.reset();
   }, [mazeBuild]);
+
+  useMemo(() => {
+    WeightController.getInstance().setWeight(weight);
+  }, [weight]);
 
   const updateInputValue = (evt) => {
     const val = evt.target.value;
@@ -126,6 +138,16 @@ export const UINavbar = (props) => {
           <button onClick={() => step("next")} className={classes.navButton}>
             Do Next-Step
           </button>
+        </li>
+        <li>
+          <DropDownList
+            style={{
+              width: "150px",
+            }}
+            data={weights}
+            onChange={(e) => setWeight(e.value)}
+            defaultItem={Instances.getLanguageText().getText("select-weight")}
+          />
         </li>
       </ul>
     </section>

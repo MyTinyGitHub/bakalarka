@@ -47,7 +47,7 @@ class ObjectPositions {
     this.row = row;
     this.column = column;
 
-    ControlState.getInstance().setPositionChanged(true);
+    ControlState.getInstance().isPositionChanged(true);
   }
 }
 

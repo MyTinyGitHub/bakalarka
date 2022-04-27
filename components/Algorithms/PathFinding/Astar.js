@@ -1,6 +1,7 @@
 import { getNeigbours, buildResult } from "../HelperFunctions";
 import { PathFindingAlgorithm } from "./PathFindingAlgorithm";
 import Instances from "../../Instances/Instances";
+import WeightController from "../../Controller/WeightController";
 
 export class Astar extends PathFindingAlgorithm {
   constructor() {
@@ -61,11 +62,13 @@ export class Astar extends PathFindingAlgorithm {
         }
 
         this.hScore[neighbour] = this.calculateHScore(neighbour, this.finish);
+        const weight_node =
+          WeightController.getInstance().getWeightOnIndex(node);
 
-        if (this.gScore[neighbour] > this.gScore[node] + 1) {
+        if (this.gScore[neighbour] > this.gScore[node] + weight_node) {
           this.toVisit.push(neighbour);
 
-          this.gScore[neighbour] = this.gScore[node] + 1;
+          this.gScore[neighbour] = this.gScore[node] + weight_node;
           this.prev[neighbour] = node;
         }
 
@@ -91,7 +94,7 @@ export class Astar extends PathFindingAlgorithm {
       let calc_fscore =
         this.gScore[this.toVisit[index]] + this.hScore[this.toVisit[index]];
 
-      if (lowest_value >= calc_fscore) {
+      if (lowest_value > calc_fscore) {
         index_of_lowest_value = index;
         lowest_value = calc_fscore;
       } else if (lowest_value === calc_fscore) {

@@ -5,8 +5,6 @@ export default class ControlState {
     this.positionChanged = false;
   }
 
-  setPositionChanged(boolean) {}
-
   setOperational(boolean) {
     this.operational = boolean;
   }

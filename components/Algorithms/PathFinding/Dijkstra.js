@@ -1,6 +1,7 @@
 import { getNeigbours, buildResult } from "../HelperFunctions";
 import { PathFindingAlgorithm } from "./PathFindingAlgorithm";
 import Instances from "../../Instances/Instances";
+import WeightController from "../../Controller/WeightController";
 
 export class Dijkstra extends PathFindingAlgorithm {
   constructor() {
@@ -55,11 +56,12 @@ export class Dijkstra extends PathFindingAlgorithm {
 
       node = this.toVisit.splice(lowestIdx, 1)[0];
 
-      let neighbours = getNeigbours(node);
+      const neighbours = getNeigbours(node);
+
       this.visited.push(node);
 
       neighbours.map((neighbour) => {
-        return this.evaluateNeighbour(neighbour, node);
+        this.evaluateNeighbour(neighbour, node);
       });
 
       if (this.found) {
@@ -75,11 +77,24 @@ export class Dijkstra extends PathFindingAlgorithm {
       return;
     }
 
-    if (this.dist[neighbour] > this.dist[node] + 1) {
+    if (
+      this.dist[neighbour] >
+      this.dist[node] +
+        parseInt(WeightController.getInstance().getWeightOnIndex(node))
+    ) {
       this.toVisit.push(neighbour);
-
-      this.dist[neighbour] = this.dist[node] + 1;
+      this.dist[neighbour] =
+        this.dist[node] +
+        parseInt(WeightController.getInstance().getWeightOnIndex(node));
       this.prev[neighbour] = node;
+    }
+
+    if (
+      this.dist[node] +
+        parseInt(WeightController.getInstance().getWeightOnIndex(node)) !=
+      1
+    ) {
+      console.log(WeightController.getInstance().getWeightOnIndex(node));
     }
 
     if (neighbour === this.finish) {
