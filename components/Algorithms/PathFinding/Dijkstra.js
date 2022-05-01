@@ -16,6 +16,8 @@ export class Dijkstra extends PathFindingAlgorithm {
 
     this.start = -1;
     this.finish = -1;
+
+    this.weightController = WeightController.getInstance();
   }
 
   initialize() {
@@ -79,22 +81,12 @@ export class Dijkstra extends PathFindingAlgorithm {
 
     if (
       this.dist[neighbour] >
-      this.dist[node] +
-        parseInt(WeightController.getInstance().getWeightOnIndex(node))
+      this.dist[node] + this.weightController.getWeightOnIndex(node)
     ) {
       this.toVisit.push(neighbour);
       this.dist[neighbour] =
-        this.dist[node] +
-        parseInt(WeightController.getInstance().getWeightOnIndex(node));
+        this.dist[node] + this.weightController.getWeightOnIndex(node);
       this.prev[neighbour] = node;
-    }
-
-    if (
-      this.dist[node] +
-        parseInt(WeightController.getInstance().getWeightOnIndex(node)) !=
-      1
-    ) {
-      console.log(WeightController.getInstance().getWeightOnIndex(node));
     }
 
     if (neighbour === this.finish) {

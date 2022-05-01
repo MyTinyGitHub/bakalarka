@@ -1,5 +1,5 @@
 import { MazeBuilder } from "../Algorithms/LabBuilding/MazeBuilder";
-import { number_of_cols, number_of_rows } from "../Grid/grid";
+import { nodes, number_of_cols, number_of_rows } from "../Grid/grid";
 
 import ControlState from "../Controller/ControlState";
 import Instances from "../Instances/Instances";
@@ -134,7 +134,7 @@ export class DisplayHandler {
         if (
           document.getElementById(result_index).classList[1] === "node-wall"
         ) {
-          Instances.getGrid().getGrid().clearWall(index_x, index_y);
+          nodes[result_index].clearWall();
         }
       }
     }
@@ -145,32 +145,12 @@ export class DisplayHandler {
     val = val.replace("node-result", "");
     val = val.replace("node-algo", "");
     document.getElementById(node_index).className = val;
-
-    // if (document.getElementById(node_index).classList.contains("node-finish")) {
-    //   document.getElementById(node_index).className = "node node-finish";
-    // }
-    // if (document.getElementById(node_index).classList.contains("node-start")) {
-    //   document.getElementById(node_index).className = "node node-start";
-    // }
-    // if (document.getElementById(node_index).classList.contains("node-algo")) {
-    //   document.getElementById(node_index).className = "node";
-    // }
   }
 
   static clearOneSquarePath(node_index) {
     let val = document.getElementById(node_index).className;
     val = val.replace("node-algo", "");
     document.getElementById(node_index).className = val;
-    // if (document.getElementById(node_index).classList.contains("node-finish")) {
-    //   document.getElementById(node_index).className = "node node-finish";
-    // }
-    // if (document.getElementById(node_index).classList.contains("node-start")) {
-    //   document.getElementById(node_index).className =
-    //     "node node-algo node-start";
-    // }
-    // if (document.getElementById(node_index).classList.contains("node-result")) {
-    //   document.getElementById(node_index).className = "node node-algo";
-    // }
   }
 
   static clearAlgorithm() {
@@ -186,6 +166,7 @@ export class DisplayHandler {
     if (Instances.getAlgorithm().isEmpty()) return;
 
     const algorithm = Instances.getAlgorithm().getAlgorithm();
+    DisplayHandler.clearAlgorithm();
 
     const result = algorithm.execute();
     const array = result["visited"];
@@ -194,8 +175,6 @@ export class DisplayHandler {
     if (path.length === 0) {
       return;
     }
-
-    DisplayHandler.clearAlgorithm();
 
     let lfinish = Instances.getFinish().getIndex();
 
@@ -219,10 +198,7 @@ export class DisplayHandler {
 
     DisplayHandler.reset();
     DisplayHandler.clearAlgorithm();
-    const temp = WeightController.getInstance().getWeight();
-    WeightController.getInstance().setWeight(
-      Instances.getLanguageText().getText("select-weight")
-    );
+
     let maze_grid = Instances.getMaze().getAlgorithm().create();
 
     let start = Instances.getStart().getIndex();
@@ -232,16 +208,13 @@ export class DisplayHandler {
       row.map((col, col_idx) => {
         let index = row_idx * number_of_cols + col_idx;
         if (col === 0) {
-          Instances.getGrid().getGrid().clearWall(row_idx, col_idx);
+          nodes[index].clearWall();
         }
 
         if (col === 1 && index !== start && index !== finish) {
-          if (!Instances.getGrid().getGrid().isWall(row_idx, col_idx)) {
-            Instances.getGrid().getGrid().setWall(row_idx, col_idx);
-          }
+          nodes[index].setWall();
         }
       });
     });
-    WeightController.getInstance().setWeight(temp);
   }
 }

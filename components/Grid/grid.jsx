@@ -9,81 +9,13 @@ import MouseMode from "../Controller/MouseMode";
 import Instances from "../Instances/Instances";
 import CurrentOperation from "../UI/current-operation";
 import WeightController from "../Controller/WeightController";
+import { ColumnResize } from "@progress/kendo-react-data-tools";
 
 export let number_of_rows = 16;
 export let number_of_cols = 16;
 
 export const walls = new Set();
-
-const setWallBool = (Grid, r, c, value) =>
-  Grid.map((row, rowIdx) =>
-    rowIdx === r
-      ? row.map((column, columnIdx) =>
-          columnIdx === c
-            ? {
-                ...column,
-                isWall: value,
-              }
-            : column
-        )
-      : row
-  );
-
-const setWall = (Grid, r, c) =>
-  Grid.map((row, rowIdx) =>
-    rowIdx === r
-      ? row.map((column, columnIdx) =>
-          columnIdx === c
-            ? {
-                ...column,
-                isWall: !column.isWall,
-              }
-            : column
-        )
-      : row
-  );
-
-const setFinish = (Grid, r, c, value) =>
-  Grid.map((row, rowIdx) =>
-    rowIdx === r
-      ? row.map((column, columnIdx) =>
-          columnIdx === c
-            ? {
-                ...column,
-                isFinish: value,
-              }
-            : column
-        )
-      : row
-  );
-
-const setWeight = (Grid, r, c, value) =>
-  Grid.map((row, rowIdx) =>
-    rowIdx === r
-      ? row.map((column, columnIdx) =>
-          columnIdx === c
-            ? {
-                ...column,
-                weight: value,
-              }
-            : column
-        )
-      : row
-  );
-
-const setStart = (Grid, r, c, value) =>
-  Grid.map((row, rowIdx) =>
-    rowIdx === r
-      ? row.map((column, columnIdx) =>
-          columnIdx === c
-            ? {
-                ...column,
-                isStart: value,
-              }
-            : column
-        )
-      : row
-  );
+export const nodes = [];
 
 export default class GridClass extends Component {
   constructor() {
@@ -94,98 +26,6 @@ export default class GridClass extends Component {
     };
 
     Instances.getGrid().setGrid(this);
-
-    this.mouse_down = this.mouse_down.bind(this);
-    this.mouseUp = this.mouse_up.bind(this);
-    this.changeStartAndFinishPosition =
-      this.changeStartAndFinishPosition.bind(this);
-
-    this.setWall = function setWall(row, col) {
-      if (
-        WeightController.getInstance().getWeight() ===
-        Instances.getLanguageText().getText("select-weight")
-      ) {
-        walls.add(row * number_of_cols + col);
-        this.setState((state) => ({
-          grid: setWallBool(state.grid, row, col, true),
-        }));
-      } else {
-        WeightController.getInstance().setWeightOnIndex(
-          row * number_of_cols + col
-        );
-        this.clearWall(row, col);
-        this.setState((state) => ({
-          grid: setWeight(state.grid, row, col, false),
-        }));
-      }
-    }.bind(this);
-
-    this.clearWall = function clearWall(row, col) {
-      walls.delete(row * number_of_cols + col);
-      this.setState((state) => ({
-        grid: setWallBool(state.grid, row, col, false),
-      }));
-    }.bind(this);
-
-    this.toggleWall = function toggleWall(row, col) {
-      if (
-        WeightController.getInstance().getWeight() ===
-        Instances.getLanguageText().getText("select-weight")
-      ) {
-        if (walls.has(row * number_of_cols + col)) {
-          walls.delete(row * number_of_cols + col);
-        } else {
-          walls.add(row * number_of_cols + col);
-        }
-
-        this.setState((state) => ({
-          grid: setWall(state.grid, row, col),
-        }));
-      } else {
-        WeightController.getInstance().setWeightOnIndex(
-          row * number_of_cols + col
-        );
-        this.clearWall(row, col);
-        this.setState((state) => ({
-          grid: setWeight(state.grid, row, col, false),
-        }));
-      }
-    }.bind(this);
-
-    this.isWall = function isWall(row, col) {
-      return walls.has(row * number_of_cols + col);
-    };
-
-    this.setFinish = function toggleFinish(row, col, value) {
-      if (value === true) this.changeStartAndFinishPosition("finish", row, col);
-
-      this.setState((state) => ({
-        grid: setFinish(state.grid, row, col, value),
-      }));
-
-      DisplayHandler.instant();
-    }.bind(this);
-
-    this.setStart = function toggleStart(row, col, value) {
-      if (value == true) this.changeStartAndFinishPosition("start", row, col);
-
-      this.setState((state) => ({
-        grid: setStart(state.grid, row, col, value),
-      }));
-
-      DisplayHandler.instant();
-    }.bind(this);
-  }
-
-  changeStartAndFinishPosition(type, row, col) {
-    switch (type) {
-      case "start":
-        Instances.getStart().setPositions(row, col);
-        break;
-      case "finish":
-        Instances.getFinish().setPositions(row, col);
-        break;
-    }
   }
 
   componentDidMount() {
@@ -220,22 +60,34 @@ export default class GridClass extends Component {
     }
   }
 
+  clearWall() {
+    this.state.grid.map((row, rowIdx) => {
+      return row.map((column) => {
+        column.setWall();
+      });
+    });
+  }
+
   create_grid() {
     let grid = [];
     for (let row = 0; row < number_of_rows; row++) {
       let current_row = [];
 
       for (let column = 0; column < number_of_cols; column++) {
-        current_row.push({
-          isWall: false,
-          isFinish: Instances.getFinish().isEqual(row, column),
-          isStart: Instances.getStart().isEqual(row, column),
-          weight: Infinity,
-        });
+        current_row.push(
+          <Node
+            row={row}
+            column={column}
+            key={row * number_of_cols + column}
+            id={row * number_of_cols + column}
+            isWall={false}
+            isFinish={Instances.getFinish().isEqual(row, column)}
+            isStart={Instances.getStart().isEqual(row, column)}
+          ></Node>
+        );
       }
       grid.push(current_row);
     }
-
     return grid;
   }
 
@@ -251,21 +103,9 @@ export default class GridClass extends Component {
               onMouseLeave={(e) => this.mouse_leave(e)}
               className={classes.grid}
             >
-              {this.state.grid.map((row, rowIdx) => {
-                return row.map((column, columnIdx) => {
-                  const { isWall, isFinish, isStart } = column;
-
-                  return (
-                    <Node
-                      row={rowIdx}
-                      column={columnIdx}
-                      key={rowIdx * number_of_cols + columnIdx}
-                      id={rowIdx * number_of_cols + columnIdx}
-                      isWall={isWall}
-                      isFinish={isFinish}
-                      isStart={isStart}
-                    ></Node>
-                  );
+              {this.state.grid.map((row) => {
+                return row.map((node) => {
+                  return node;
                 });
               })}
             </div>

@@ -15,7 +15,6 @@ export default class WeightController {
   }
 
   setWeightOnIndex(index) {
-    console.log(this.weight);
     this.weights[index] = this.weight;
   }
 

@@ -9,7 +9,6 @@ export default class MouseMode {
   }
 
   getMode() {
-    console.log(this.mouseMode);
     return this.mouseMode;
   }
 

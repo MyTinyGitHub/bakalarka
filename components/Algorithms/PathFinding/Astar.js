@@ -98,7 +98,11 @@ export class Astar extends PathFindingAlgorithm {
         index_of_lowest_value = index;
         lowest_value = calc_fscore;
       } else if (lowest_value === calc_fscore) {
-        index_of_lowest_value = index;
+        if (
+          this.gScore[index_of_lowest_value] > this.gScore[this.toVisit[index]]
+        ) {
+          index_of_lowest_value = index;
+        }
       }
     }
     return index_of_lowest_value;

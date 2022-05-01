@@ -21,7 +21,7 @@ const maze_builds = [
   Instances.getLanguageText().getText("side-winder-maze"),
 ];
 
-const weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const weights = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 export const UINavbar = (props) => {
   const [category, setCategory] = useState("");
@@ -60,7 +60,7 @@ export const UINavbar = (props) => {
   }, [category]);
 
   const changeMazeBuild = useMemo(() => {
-    if (mazeBuild === Instances.getLanguageText().getText("select-algo"))
+    if (mazeBuild === Instances.getLanguageText().getText("select-maze"))
       DisplayHandler.reset();
   }, [mazeBuild]);
 
